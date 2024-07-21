@@ -1,17 +1,18 @@
+setup:
+  config:
+    NPM_CONFIG_PRODUCTION: false
+  addons:
+    - plan: heroku-postgresql:hobby-dev
+
 build:
   docker:
-    server: workspaces/server/Dockerfile
-    client: workspaces/client/Dockerfile
+    web: Dockerfile
+  config:
+    NODE_ENV: development
 
 release:
   command:
-    - echo "Running release command"
     - npm run typeorm:run-migrations --workspace=server
 
 run:
-  web: 
-    docker: 
-      server: 
-        command: npm run start --workspace=server
-      client: 
-        command: npm run start --workspace=client
+  web: docker-compose -f docker-compose.dev.yaml up
