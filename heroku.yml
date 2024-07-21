@@ -6,13 +6,11 @@ setup:
 
 build:
   docker:
-    web: Dockerfile
-  config:
-    NODE_ENV: development
+    web: Dockerfile # Указываем Dockerfile для сборки вашего приложения
 
 release:
   command:
     - npm run typeorm:run-migrations --workspace=server
 
 run:
-  web: docker-compose -f docker-compose.dev.yaml up
+  web: npm run start --workspace=server # Команда для запуска вашего приложения
