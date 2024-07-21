@@ -1,1 +1,1 @@
-web: docker-compose -f docker-compose.prod.yaml up
+web: npm run start --workspace=server
