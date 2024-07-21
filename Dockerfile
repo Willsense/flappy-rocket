@@ -1,12 +1,14 @@
-# Use the official Node.js image as the base image
-FROM node:20 AS builder
+# Base image
+FROM node:20 as base
 
-# Set the working directory in the container
 WORKDIR /app
 
 # Copy shared files
 COPY package*.json ./
 COPY tsconfig.json ./
+
+# Install dependencies
+RUN npm install
 
 # Copy server files
 COPY workspaces/server/package*.json workspaces/server/
@@ -16,27 +18,29 @@ COPY workspaces/server workspaces/server/
 COPY workspaces/client/package*.json workspaces/client/
 COPY workspaces/client workspaces/client/
 
+# Stage for server
+FROM base as server
+
+WORKDIR /app/workspaces/server
+
 # Install dependencies
-RUN npm ci
+RUN npm install --production
+
+# Run server
+CMD ["npm", "run", "start", "--workspace=server"]
+
+# Stage for client
+FROM base as client
+
+WORKDIR /app/workspaces/client
 
 # Build client
-WORKDIR /app/workspaces/client
 RUN npm run build --workspace=client
 
-# Build server
-WORKDIR /app
+# Serve client
+FROM nginx:alpine
 
-# Production image
-FROM node:20
+COPY --from=client /app/workspaces/client/dist /usr/share/nginx/html
 
-# Set the working directory in the container
-WORKDIR /app
-
-# Copy dependencies and built client
-COPY --from=builder /app /app
-
-# Expose the port the app runs on
-EXPOSE 3000
-
-# Start the server
-CMD ["npm", "run", "start", "--workspace=server"]
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
