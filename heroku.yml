@@ -1,0 +1,17 @@
+build:
+  docker:
+    server: workspaces/server/Dockerfile
+    client: workspaces/client/Dockerfile
+
+release:
+  command:
+    - echo "Running release command"
+    - npm run typeorm:run-migrations --workspace=server
+
+run:
+  web: 
+    docker: 
+      server: 
+        command: npm run start --workspace=server
+      client: 
+        command: npm run start --workspace=client
